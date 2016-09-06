@@ -140,5 +140,9 @@ class ViewController: UIViewController, KDDragAndDropCollectionViewDataSource {
         
     }
 
+    func collectionView(collectionView: UICollectionView, didMoveDataItemFromIndexPath from: NSIndexPath, toIndexPath to: NSIndexPath) {
+        print("Did Move Data From Index \(from), to \(to)")
+    }
+
 }
 

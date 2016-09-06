@@ -16,6 +16,7 @@ import UIKit
     func collectionView(collectionView: UICollectionView, dataItemForIndexPath indexPath: NSIndexPath) -> AnyObject
     
     func collectionView(collectionView: UICollectionView, moveDataItemFromIndexPath from: NSIndexPath, toIndexPath to : NSIndexPath) -> Void
+    func collectionView(collectionView: UICollectionView, didMoveDataItemFromIndexPath from: NSIndexPath, toIndexPath to : NSIndexPath) -> Void
     func collectionView(collectionView: UICollectionView, insertDataItem dataItem : AnyObject, atIndexPath indexPath: NSIndexPath) -> Void
     func collectionView(collectionView: UICollectionView, deleteDataItemAtIndexPath indexPath: NSIndexPath) -> Void
     
@@ -28,6 +29,9 @@ class KDDragAndDropCollectionView: UICollectionView, KDDraggable, KDDroppable {
     }
     
     var draggingPathOfCellBeingDragged : NSIndexPath?
+
+    var initialDraggingPath: NSIndexPath?
+    var lastDroppingPath : NSIndexPath?
     
     var iDataSource : UICollectionViewDataSource?
     var iDelegate : UICollectionViewDelegate?
@@ -95,13 +99,17 @@ class KDDragAndDropCollectionView: UICollectionView, KDDraggable, KDDroppable {
     func startDraggingAtPoint(point : CGPoint) -> Void {
         
         self.draggingPathOfCellBeingDragged = self.indexPathForItemAtPoint(point)
+        self.initialDraggingPath = self.draggingPathOfCellBeingDragged
         
         self.reloadData()
         
     }
     
     func stopDragging() -> Void {
-        
+
+        self.lastDroppingPath = self.draggingPathOfCellBeingDragged
+        self.didEndDragging()
+
         if let idx = self.draggingPathOfCellBeingDragged {
             if let cell = self.cellForItemAtIndexPath(idx) {
                 cell.hidden = false
@@ -392,8 +400,17 @@ class KDDragAndDropCollectionView: UICollectionView, KDDraggable, KDDroppable {
         self.draggingPathOfCellBeingDragged = nil
         
         self.reloadData()
-        
     }
-    
+
+    func didEndDragging() {
+        if  let dragDropDataSource = self.dataSource as? KDDragAndDropCollectionViewDataSource,
+            let index = initialDraggingPath,
+            let toIndex = self.lastDroppingPath {
+            dragDropDataSource.collectionView(self, didMoveDataItemFromIndexPath: index, toIndexPath: toIndex)
+        }
+        self.initialDraggingPath = nil
+        self.lastDroppingPath = nil
+    }
+
     
 }
